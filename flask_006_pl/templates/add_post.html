@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>Create new post</h1>
+{% endblock %}
+
+{% block content %}
+
+{% for cat, message in get_flashed_messages(True) %}
+<div class="flash {{ cat }}">{{ message }}</div>
+{% endfor %}
+
+
+
+<form action="{{ url_for('add_post') }}" method="POST">
+    <label for="name">Title</label>
+    <input type="text" id="name" name="name" required>
+    <label for="post">Content</label>
+    <textarea name="post" id="post" cols = '38' rows="10"></textarea>
+    <input type="submit" value="Create">
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+.validation_error {
+    color: #911003;
+}
+
+.unfilled_error {
+    color: #8b5c00;
+}
+
+.error {
+    background-color: #ff0069;
+}
+
+.success {
+    background-color: aquamarine;
+}
+
+.post {
+    color:black;
+}
+
+.post-link {
+    text-decoration: none;
+    color: rgba(255,0,105,0.85);
+}
