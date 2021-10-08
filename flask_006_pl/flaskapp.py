@@ -5,6 +5,7 @@ import sqlite3
 from flask import Flask, render_template, url_for, request, flash, get_flashed_messages, g, abort, session, redirect
 
 from flask_006_pl.flask_database import FlaskDataBase
+from flask_006_pl.validation import check_password
 
 DATABASE = 'flaskapp.db'
 DEBUG = True
@@ -75,15 +76,22 @@ def signup():
             flash('Некорректный email!', category='validation_error')
         elif not password:
             flash('Пароль не указан!', category='unfilled_error')
-        elif len(password) < 8:
-            flash('Пароль слишком короткий', category='validation_error')
+            return render_template('signup.html', menu_url=fdb.get_menu())
         else:
-            res = fdb.signup(email, password)
-            if not res:
-                flash('User was not signed up. Unexpected error', category='error')
+            password_errors = check_password(password)
+            if password_errors['password_ok']:
+                res = fdb.signup(email, password)
+                if not res:
+                    flash('User was not signed up. Unexpected error', category='error')
+                else:
+                    flash('Successful signing up', category='success')
+                    return redirect(url_for('index'))
             else:
-                flash('Successful signing up', category='success')
-                return redirect(url_for('index'))
+                for error in password_errors.keys():
+                    if password_errors[error]:
+                        flash(error, category='validation_error')
+                        break
+
     return render_template('signup.html', menu_url=fdb.get_menu())
 
 

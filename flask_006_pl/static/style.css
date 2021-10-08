@@ -1,5 +1,6 @@
 .validation_error {
-    color: #911003;
+    background-color: rgba(144,39,134,0.85);
+    color: white;
 }
 
 .unfilled_error {
