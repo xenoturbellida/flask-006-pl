@@ -74,9 +74,7 @@ class FlaskDataBase:
         try:
             self.__cur.execute(query)
             res = self.__cur.fetchall()
-            print('hereeeee')
             if res:
-                print(res)
                 return True
         except Exception as e:
             print(f"Unexpected exception {e}")

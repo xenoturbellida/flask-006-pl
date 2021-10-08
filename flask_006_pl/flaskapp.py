@@ -47,12 +47,67 @@ url_menu_items = {
 def index():
     fdb = FlaskDataBase(get_db())
     if 'username' in session:
-        return f'Logged in as {session["username"]}'
+        # return f'Logged in as {session["username"]}'
+        return render_template(
+            'index.html',
+            menu_url=fdb.get_menu(),
+            posts=fdb.get_posts(),
+            username=session.get('username')
+        )
     return render_template(
         'index.html',
         menu_url=fdb.get_menu(),
         posts=fdb.get_posts()
     )
+
+
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    fdb = FlaskDataBase(get_db())
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        if not email:
+            flash('Email не указан!', category='unfilled_error')
+        elif '@' not in email or '.' not in email:
+            flash('Некорректный email!', category='validation_error')
+        elif not password:
+            flash('Пароль не указан!', category='unfilled_error')
+        elif len(password) < 8:
+            flash('Пароль слишком короткий', category='validation_error')
+        else:
+            res = fdb.signup(email, password)
+            if not res:
+                flash('User was not signed up. Unexpected error', category='error')
+            else:
+                flash('Successful signing up', category='success')
+                return redirect(url_for('index'))
+    return render_template('signup.html', menu_url=fdb.get_menu())
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    fdb = FlaskDataBase(get_db())
+    if request.method == 'GET':
+        return render_template('login.html', menu_url=fdb.get_menu())
+    elif request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if not email:
+            flash('Email не указан!', category='unfilled_error')
+        elif '@' not in email or '.' not in email:
+            flash('Некорректный email!', category='validation_error')
+        elif not password:
+            flash('Пароль не указан!', category='unfilled_error')
+        if fdb.login(email, password):
+            session['username'] = email
+            return redirect(url_for('index'))
+        print(request)
+        print(get_flashed_messages(True))
+        # return render_template('login.html', menu_url=fdb.get_menu())
+        return redirect(url_for('index'))
+    else:
+        raise Exception(f'Method {request.method} not allowed')
 
 
 @app.route('/logout')
@@ -116,54 +171,6 @@ def post_content(post_id):
     if not title:
         abort(404)
     return render_template('post.html', menu_url=fdb.get_menu(), title=title, content=content)
-
-
-@app.route('/login', methods=['POST', 'GET'])
-def login():
-    fdb = FlaskDataBase(get_db())
-    if request.method == 'GET':
-        return render_template('login.html', menu_url=fdb.get_menu())
-    elif request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        # if not email:
-        #     flash('Email не указан!', category='unfilled_error')
-        # elif '@' not in email or '.' not in email:
-        #     flash('Некорректный email!', category='validation_error')
-        # elif not password:
-        #     flash('Пароль не указан!', category='unfilled_error')
-        if fdb.login(email, password):
-            return redirect(url_for('second'))
-        print(request)
-        print(get_flashed_messages(True))
-        # return render_template('login.html', menu_url=fdb.get_menu())
-        return redirect(url_for('index'))
-    else:
-        raise Exception(f'Method {request.method} not allowed')
-
-
-@app.route('/signup', methods=['POST', 'GET'])
-def signup():
-    fdb = FlaskDataBase(get_db())
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        if not email:
-            flash('Email не указан!', category='unfilled_error')
-        elif '@' not in email or '.' not in email:
-            flash('Некорректный email!', category='validation_error')
-        elif not password:
-            flash('Пароль не указан!', category='unfilled_error')
-        elif len(password) < 8:
-            flash('Пароль слишком короткий', category='validation_error')
-        else:
-            res = fdb.signup(email, password)
-            if not res:
-                flash('User was not signed up. Unexpected error', category='error')
-            else:
-                flash('Successful signing up', category='success')
-                return redirect(url_for('index'))
-    return render_template('signup.html', menu_url=fdb.get_menu())
 
 
 @app.errorhandler(404)

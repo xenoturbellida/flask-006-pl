@@ -16,4 +16,9 @@
   <hr>
   {% endfor %}
 
+  {% if username %}
+    <h4>Greeting! You are {{ username }}</h4>
+    <a href="{{ url_for('logout') }}">LOG OUT</a>
+  {% endif %}
+
 {% endblock %}
