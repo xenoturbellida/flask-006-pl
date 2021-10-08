@@ -47,12 +47,11 @@ url_menu_items = {
 def index():
     fdb = FlaskDataBase(get_db())
     if 'username' in session:
-        # return f'Logged in as {session["username"]}'
         return render_template(
             'index.html',
             menu_url=fdb.get_menu(),
             posts=fdb.get_posts(),
-            username=session.get('username')
+            username=session.get('username').split('@')[0]
         )
     return render_template(
         'index.html',
@@ -67,7 +66,10 @@ def signup():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        if not email:
+
+        if 'username' in session:
+            flash('Вы уже зарегистрированы', category='error')
+        elif not email:
             flash('Email не указан!', category='unfilled_error')
         elif '@' not in email or '.' not in email:
             flash('Некорректный email!', category='validation_error')
@@ -99,13 +101,10 @@ def login():
             flash('Некорректный email!', category='validation_error')
         elif not password:
             flash('Пароль не указан!', category='unfilled_error')
-        if fdb.login(email, password):
+        elif fdb.login(email, password):
             session['username'] = email
             return redirect(url_for('index'))
-        print(request)
-        print(get_flashed_messages(True))
-        # return render_template('login.html', menu_url=fdb.get_menu())
-        return redirect(url_for('index'))
+        return render_template('login.html', menu_url=fdb.get_menu())
     else:
         raise Exception(f'Method {request.method} not allowed')
 
@@ -142,7 +141,7 @@ def second():
 # int, float, path
 @app.route('/user/<username>')
 def profile(username):
-    return f"<h1>Hello {username}!</h1>"
+    return f"<h1>Hello, {username.split('@')[0]}!</h1>"
 
 
 @app.route('/add_post', methods=['GET', 'POST'])

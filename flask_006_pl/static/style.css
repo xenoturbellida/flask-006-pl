@@ -3,7 +3,8 @@
 }
 
 .unfilled_error {
-    color: #8b5c00;
+    background-color: rgba(144,32,32,0.85);
+    color: white;
 }
 
 .error {
