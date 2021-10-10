@@ -8,8 +8,7 @@ from flask import Flask, render_template, url_for, request, flash, get_flashed_m
 from flask_006_pl.flask_database import FlaskDataBase
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from flask_006_pl.helpers import check_ext
-from flask_006_pl.validation import check_password
+from flask_006_pl.helpers import check_ext, check_password
 
 DATABASE = 'flaskapp.db'
 DEBUG = True
@@ -96,6 +95,9 @@ def index():
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+    email = ''
+    password = ''
+
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -108,7 +110,6 @@ def signup():
             flash('Некорректный email!', category='validation_error')
         elif not password:
             flash('Пароль не указан!', category='unfilled_error')
-            return render_template('signup.html', menu_url=fdb.get_menu())
         else:
             password_errors = check_password(password)
             if password_errors['password_ok']:
@@ -123,14 +124,25 @@ def signup():
                     if password_errors[error]:
                         flash(error, category='validation_error')
                         break
-
-    return render_template('signup.html', menu_url=fdb.get_menu())
+        return render_template('signup.html',
+                               menu_url=fdb.get_menu(),
+                               email_value=email,
+                               password_value=password)
+    return render_template('signup.html',
+                           menu_url=fdb.get_menu(),
+                           email_value=email,
+                           password_value=password)
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    email = ''
+    password = ''
     if request.method == 'GET':
-        return render_template('login.html', menu_url=fdb.get_menu())
+        return render_template('login.html',
+                               menu_url=fdb.get_menu(),
+                               email_value=email,
+                               password_value=password)
     elif request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -146,7 +158,10 @@ def login():
                 session['username'] = email
                 return redirect(url_for('index'))
         flash('Неправильные данные аккаунта!', category='validation_error')
-        return render_template('login.html', menu_url=fdb.get_menu())
+        return render_template('login.html',
+                               menu_url=fdb.get_menu(),
+                               email_value=email,
+                               password_value=password)
     else:
         raise Exception(f'Method {request.method} not allowed')
 
