@@ -112,7 +112,7 @@ def signup():
         else:
             password_errors = check_password(password)
             if password_errors['password_ok']:
-                res = fdb.signup(email, password)
+                res = fdb.signup(email, generate_password_hash(password))
                 if not res:
                     flash('User was not signed up. Unexpected error', category='error')
                 else:
@@ -140,9 +140,12 @@ def login():
             flash('Некорректный email!', category='validation_error')
         elif not password:
             flash('Пароль не указан!', category='unfilled_error')
-        elif fdb.login(email, password):
-            session['username'] = email
-            return redirect(url_for('index'))
+        else:
+            proper_password_hash = fdb.login(email)
+            if check_password_hash(proper_password_hash, password):
+                session['username'] = email
+                return redirect(url_for('index'))
+        flash('Неправильные данные аккаунта!', category='validation_error')
         return render_template('login.html', menu_url=fdb.get_menu())
     else:
         raise Exception(f'Method {request.method} not allowed')

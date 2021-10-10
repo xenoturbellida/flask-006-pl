@@ -88,7 +88,8 @@ class FlaskDataBase:
             return False
         return True
 
-    def login(self, email, password):
+    """
+      def login(self, email, password):
         query = f"SELECT * FROM users WHERE email = '{email}' AND password = '{password}'"
         try:
             self.__cur.execute(query)
@@ -98,3 +99,15 @@ class FlaskDataBase:
         except Exception as e:
             print(f"Unexpected exception {e}")
         return False
+    """
+
+    def login(self, email):
+        query = f"SELECT password FROM users WHERE email = '{email}'"
+        try:
+            self.__cur.execute(query)
+            res = self.__cur.fetchone()
+            if res:
+                return res[0]
+        except Exception as e:
+            print(f"Unexpected exception {e}")
+        return ""
